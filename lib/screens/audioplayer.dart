@@ -10,8 +10,8 @@ class MyAudioPlayer extends StatefulWidget {
 }
 
 class _MyAudioPlayerState extends State<MyAudioPlayer> {
-  String audioUrl = "https://rr5---sn-a5mlrnek.googlevideo.com/videoplayback?expire=1707046658&ei=oiK_ZfD4O9uQvcAPoam-yAE&ip=158.62.43.63&id=o-AEG_nkUd2GaVNccqYqh8wtJI6K-0ENexk6TA1erHz-Pi&itag=599&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&vprv=1&svpuc=1&mime=audio%2Fmp4&gir=yes&clen=14243997&dur=3701.446&lmt=1698766895809876&keepalive=yes&fexp=24007246&c=ANDROID&txp=4532434&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Cvprv%2Csvpuc%2Cmime%2Cgir%2Cclen%2Cdur%2Clmt&sig=AJfQdSswRAIgezQcslvy1jxnw8kgVQqUCuKHgzNI_1ebG29trBz-RtcCIHFrF5JVXdeQ1-tOB46OlAyKJQFmd6ep0f49NIIx08NG&rm=sn-bavcx-hoaey76,sn-bavcx-hoaek7k&req_id=74fd227f829ca3ee&ipbypass=yes&redirect_counter=3&cm2rm=sn-hoaz7z&cms_redirect=yes&cmsv=e&mh=Bk&mip=150.107.9.13&mm=34&mn=sn-a5mlrnek&ms=ltu&mt=1707024783&mv=D&mvi=5&pl=0&lsparams=ipbypass,mh,mip,mm,mn,ms,mv,mvi,pl&lsig=AAO5W4owRQIhAOOz-3d33m4voOCJ6icFdUu-K-HvrldiHSpCphIDkuJbAiAf8zNNv5eVrJL-z-9LxOgxOtheePXX9dgmSSfv8r2Ozw%3D%3D";
-      // "https://raag.fm/files/mp3/128/Hindi-Singles/23303/Kesariya%20(Brahmastra)%20-%20(Raag.Fm).mp3";
+  String audioUrl = "https://firebasestorage.googleapis.com/v0/b/my-first-project-66ff6.appspot.com/o/music%2Fjta%20jti%20da%20crush.m4a?alt=media&token=a120708d-50fb-4a7f-b23e-c086478457bf";
+bool? musicPlaying ;
   AudioPlayer? player;
   Duration currPosValue = Duration.zero;
   Duration? totalPosValue = Duration.zero;
@@ -20,7 +20,11 @@ class _MyAudioPlayerState extends State<MyAudioPlayer> {
   @override
   void initState() {
     super.initState();
+
     setUpMyAudioPlayer();
+    if(player!.playing){
+      musicPlaying = true;
+    } else {musicPlaying = false; }
   }
 
   @override
@@ -91,8 +95,10 @@ class _MyAudioPlayerState extends State<MyAudioPlayer> {
         InkWell(
           onTap: (){
             if(player!.playing){
+              musicPlaying = false ;
               player!.pause();
             } else {
+              musicPlaying = true ;
               player!.play();
             }
             setState(() {
@@ -156,9 +162,14 @@ class _MyAudioPlayerState extends State<MyAudioPlayer> {
   Widget musicPlayGif (){
     return Card(
       margin: EdgeInsets.all(100),
-      child: Image.network("https://pen.kcak11.com/music-player/assets/images/sound-effect.gif")
+      child: musicPlaying! ?
+      Image.network("https://pen.kcak11.com/music-player/assets/images/sound-effect.gif",height: 200,width: 300,)
+     : Image.network("https://media.giphy.com/avatars/mediaresidents/FskdPYum0rus.png",height: 200,width: 300,)
+
     );
   }
+
+
 
 }
 

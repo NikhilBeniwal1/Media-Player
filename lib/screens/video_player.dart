@@ -1,8 +1,10 @@
 import 'dart:js_interop';
 
 import 'package:flutter/material.dart';
-import 'package:mediaplayer/model/dataModel.dart';
+import 'package:mediaplayer/model/media_data.dart';
 import 'package:video_player/video_player.dart';
+
+import '../model/media_model.dart';
 
 class MyVideoPlayer extends StatefulWidget {
 
@@ -16,7 +18,7 @@ class MyVideoPlayer extends StatefulWidget {
 class _MyVideoPlayerState extends State<MyVideoPlayer> {
   double opacity = 1.0;
   bool isVisble = true;
-  var videos = VideoData.videos;
+  // var videos = VideoData.videos;
   VideoPlayerController? mVideoController;
   Future<void>? initialized;
   @override
@@ -24,7 +26,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    var url = videos[widget.index]["sources"];
+    var url = mediaData.categories![0].videos![widget.index].sources!; // videos[widget.index]["sources"];
     mVideoController = VideoPlayerController.networkUrl(Uri.parse(url!));
     initialized = mVideoController!.initialize();
     mVideoController!.addListener(() {setState(() {
@@ -53,17 +55,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
         ),
       ),
 
-    /*  floatingActionButton: FloatingActionButton(onPressed: () {
-        if(mVideoController!.value.isPlaying){
-          mVideoController!.pause();
-        } else {mVideoController!.play();}
-
-        setState(() {
-
-        });
-      },
-          child: mVideoController!.value.isPlaying ? Icon(Icons.pause) :Icon(Icons.play_arrow) ),
-   */ );
+    );
 
   }
 
@@ -109,7 +101,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                         } ,
                         child: AnimatedOpacity(
                           opacity: opacity,
-                          duration: isVisble ? Duration(seconds: 0) : Duration(seconds: 2),
+                          duration: isVisble ? Duration(seconds: 0) : Duration(seconds: 3),
                           child: Container(
                             width: 50,
                             height: 50,
@@ -125,7 +117,9 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                       ),
                     ),
 
-                   /// invisble container for pause and play of video
+
+
+                   /// invisble container for pause and play of video.
                     Positioned(
                         bottom: 30,
                         child: InkWell(
@@ -156,23 +150,41 @@ setState(() {
                       bottom: 5,
                       width: 500,
                       child: AnimatedOpacity(
-                       duration: isVisble == false ? Duration(seconds: 2) : Duration(seconds: 0),
+                       duration: isVisble == false ? Duration(seconds: 3) : Duration(seconds: 0),
                         opacity: opacity,
-                        child:   Slider(
+                        child:   Column(
+                          children: [
 
-                            value: mVideoController!.value.position.inSeconds.toDouble(),
-                            activeColor: Colors.white,
-                            inactiveColor: Colors.black,
-                            min: 0,
-                            max: mVideoController!.value.duration.inSeconds.toDouble(),
+                            Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Row(
 
-                            onChanged: (seekTo){
-                              if(isVisble){
-                                  mVideoController!.seekTo(
-                                      Duration(seconds: seekTo.toInt()));
-                                  setState(() {});
-                                }
-                              }
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                children: [
+
+                                  Text(getCurrentTime(),style: TextStyle(color: Colors.white),),
+                                  SizedBox(width: MediaQuery.of(context).size.width * 0.74,),
+                                  Text(getTotalDuration(),style: TextStyle(color: Colors.white),),
+                                ],
+                              ),
+                            ),
+                            Slider(
+
+                                value: mVideoController!.value.position.inSeconds.toDouble(),
+                                activeColor: Colors.white,
+                                inactiveColor: Colors.black,
+                                min: 0,
+                                max: mVideoController!.value.duration.inSeconds.toDouble(),
+
+                                onChanged: (seekTo){
+                                  if(isVisble){
+                                      mVideoController!.seekTo(
+                                          Duration(seconds: seekTo.toInt()));
+                                      setState(() {});
+                                    }
+                                  }
+                            ),
+                          ],
                         ) ,
                       ),
                     ),
@@ -192,7 +204,7 @@ setState(() {
   Widget gridOfVideos(){
     return Expanded(
       child: GridView.builder(
-        itemCount: videos.length,
+        itemCount:    mediaData.categories![0].videos!.length  ,//videos.length,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
           itemBuilder: (context, index) => GridTile(child: Column(
           children: [
@@ -204,10 +216,10 @@ setState(() {
                    return MyVideoPlayer(index: index,);
                  },));
                 },
-                child: Image.network('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/${videos[index]["thumb"]}',height: 200,width: 200,fit: BoxFit.scaleDown,)),
+                child: Image.network('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/${mediaData.categories![0].videos![widget.index].thumb!/*videos[index]["thumb"]*/}',height: 200,width: 200,fit: BoxFit.scaleDown,)),
 
             /// Movie name
-            Text(videos[index]["title"]),
+            Text(mediaData.categories![0].videos![6].title!/*videos[index]["title"]*/),
           ],
           )),
       ),
@@ -218,7 +230,7 @@ setState(() {
     return ListView.builder(
       physics: NeverScrollableScrollPhysics(),
         shrinkWrap: true,
-        itemCount: videos.length,
+        itemCount:  mediaData.categories![0].videos!.length,  // videos.length,
         itemBuilder: (context, index) {
           return InkWell(
             onTap: (){
@@ -228,31 +240,21 @@ setState(() {
               },));
             },
             child: SizedBox(height: 150,child: Row(children: [
-              Image.network('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/${videos[index]["thumb"]}',height: 200,width: 200,fit: BoxFit.scaleDown,),
-              Column(crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 20,),
-                  Text(videos[index]["title"],style: TextStyle(fontSize: 20),),
-                  Text(videos[index]["subtitle"],style: TextStyle(fontSize: 15),),
-                 // Text(videos[index]["description"],style: TextStyle(fontSize: 15),),
+              Image.network('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/${mediaData.categories![0].videos![index].thumb/*videos[index]["thumb"]*/}',height: 200,width: 200,fit: BoxFit.scaleDown,),
+              Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 20,),
+                    Text(mediaData.categories![0].videos![index].title!/*videos[index]["title"]*/,style: TextStyle(fontSize: 18),softWrap: true,),
+                    Text(mediaData.categories![0].videos![index].subtitle!/*videos[index]["subtitle"]*/,style: TextStyle(fontSize: 14),softWrap: true,),
+                   // Text(videos[index]["description"],style: TextStyle(fontSize: 15),),
 
-                ],
+                  ],
+                ),
               ),
             ],)),
-          )
-            /*ListTile(
-            onTap: (){
-              mVideoController!.pause();
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-                return MyVideoPlayer(index: index,);
-              },));
-            },
-            leading: Image.network('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/${videos[index]["thumb"]}',height: 300,width: 300,fit: BoxFit.scaleDown,),
-
-            title:  Text(videos[index]["title"]),
-            subtitle:  Text(videos[index]["subtitle"]),
-
-          )*/;
+          );
         },);
   }
 
@@ -260,15 +262,42 @@ setState(() {
     return ListTile(
       title: Column(crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(videos[widget.index]["title"],style: TextStyle(fontSize: 25),),
-          Text(videos[widget.index]["subtitle"],style: TextStyle(fontSize: 20),),
+          Text(mediaData.categories![0].videos![widget.index].title!/*videos[widget.index]["title"]*/,style: TextStyle(fontSize: 25),),
+          Text(mediaData.categories![0].videos![widget.index].subtitle!/*videos[widget.index]["subtitle"]*/,style: TextStyle(fontSize: 20),),
 
 
         ],
       ),
-      subtitle: Text(videos[widget.index]["description"],),
+      subtitle: Text(mediaData.categories![0].videos![widget.index].description!/*videos[widget.index]["description"],*/),
 
     );
+  }
+
+
+  String getCurrentTime(){
+
+
+    var min = mVideoController!.value.position.inSeconds.toInt()~/60;
+    var sec = mVideoController!.value.position.inSeconds.toInt()%60;
+
+    return "$min : $sec";
+
+  }
+
+  String getTotalDuration(){
+
+
+    var min = mVideoController!.value.duration.inSeconds.toInt()~/60;
+    var sec = mVideoController!.value.duration.inSeconds.toInt()%60;
+if(sec== 0 ){
+  sec = sec + 10; return "$min : $sec";
+}else if( sec == 1){sec = sec + 9; return "$min : $sec";}
+else if( sec == 2){sec = sec + 8; return "$min : $sec";}
+else if( sec == 3){sec = sec + 7; return "$min : $sec";}
+else if( sec == 4){sec = sec + 6; return "$min : $sec";}
+else if( sec == 5){sec = sec + 5; return "$min : $sec";}
+else{return "$min : $sec";}
+
   }
 
 }
